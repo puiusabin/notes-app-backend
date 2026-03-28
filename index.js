@@ -1,13 +1,8 @@
-require("dotenv").config;
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const Note = require("./models/note");
-
-const url = process.env.MONGODB_URI;
-
-mongoose.set("strictQuery", false);
-mongoose.connect(url, { family: 4 });
 
 const app = express();
 
@@ -52,11 +47,6 @@ app.get("/api/notes/:id", (request, response) => {
     response.status(404).end();
   }
 });
-const generateId = () => {
-  const maxId =
-    notes.length > 0 ? Math.max(...notes.map((note) => note.id)) : 0;
-  return String(maxId + 1);
-};
 
 app.post("/api/notes", (request, response) => {
   const body = request.body;
@@ -67,15 +57,14 @@ app.post("/api/notes", (request, response) => {
     });
   }
 
-  const note = {
+  const note = new Note({
     content: body.content,
     important: body.important || false,
-    id: generateId(),
-  };
+  });
 
-  notes = notes.concat(note);
-
-  response.json(note);
+  note.save().then((savedNote) => {
+    response.json(savedNote);
+  });
 });
 
 app.delete("/api/notes/:id", (request, response) => {
