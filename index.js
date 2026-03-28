@@ -1,5 +1,13 @@
+require("dotenv").config;
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
+const Note = require("./models/note");
+
+const url = process.env.MONGODB_URI;
+
+mongoose.set("strictQuery", false);
+mongoose.connect(url, { family: 4 });
 
 const app = express();
 
@@ -30,7 +38,9 @@ app.get("/", (request, response) => {
 });
 
 app.get("/api/notes", (request, response) => {
-  response.json(notes);
+  Note.find({}).then((notes) => {
+    response.json(notes);
+  });
 });
 
 app.get("/api/notes/:id", (request, response) => {
@@ -74,7 +84,7 @@ app.delete("/api/notes/:id", (request, response) => {
   response.status(204).end();
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log(`server running on port ${PORT}`);
